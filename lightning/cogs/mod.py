@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
 from lightning.utils import time
-from lightning.utils.formatters import plural
+from lightning.formatters import plural
 from collections import Counter, defaultdict
 from inspect import cleandoc
 
