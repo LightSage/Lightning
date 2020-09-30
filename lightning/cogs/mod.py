@@ -212,7 +212,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @checks.has_permissions(kick_members=True)
+    @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Kicks a member from the server.
 
@@ -229,7 +229,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @checks.has_permissions(ban_members=True)
+    @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server.
 
@@ -249,7 +249,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @checks.has_permissions(ban_members=True)
+    @commands.has_permissions(ban_members=True)
     async def multiban(self, ctx, members: commands.Greedy[MemberID], *, reason: ActionReason = None):
         """Bans multiple members from the server.
 
@@ -282,7 +282,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @checks.has_permissions(ban_members=True)
+    @commands.has_permissions(ban_members=True)
     async def massban(self, ctx, *, args):
         """Mass bans multiple members from the server.
 
@@ -471,7 +471,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @checks.has_permissions(kick_members=True)
+    @commands.has_permissions(kick_members=True)
     async def softban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Soft bans a member from the server.
 
