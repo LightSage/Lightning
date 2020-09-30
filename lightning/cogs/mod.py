@@ -192,13 +192,12 @@ def can_mute():
 ## The actual cog
 
 class Mod(commands.Cog):
-    """Moderation related commands."""
+    """Moderation related commands 
+    
+    Commands are taken from https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/mod.py (MIT Licensed)."""
 
     def __init__(self, bot):
         self.bot = bot
-
-        # guild_id: SpamChecker
-        self._spam_check = defaultdict(SpamChecker)
 
         # guild_id: List[(member_id, insertion)]
         # A batch of data for bulk inserting mute role changes
@@ -213,43 +212,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: MemberID, *, reason: ActionReason = None):
-        """Kicks a member from the server.
-
-        In order for this to work, the bot must have Kick Member permissions.
-
-        To use this command you must have Kick Members permission.
-        """
-
-        if reason is None:
-            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
-
-        await ctx.guild.kick(member, reason=reason)
-        await ctx.send('\N{OK HAND SIGN}')
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
-        """Bans a member from the server.
-
-        You can also ban from ID to ban regardless whether they're
-        in the server or not.
-
-        In order for this to work, the bot must have Ban Member permissions.
-
-        To use this command you must have Ban Members permission.
-        """
-
-        if reason is None:
-            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
-
-        await ctx.guild.ban(member, reason=reason)
-        await ctx.send('\N{OK HAND SIGN}')
-
-    @commands.command()
-    @commands.guild_only()
+    @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(ban_members=True)
     async def multiban(self, ctx, members: commands.Greedy[MemberID], *, reason: ActionReason = None):
         """Bans multiple members from the server.
@@ -283,6 +246,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(ban_members=True)
     async def massban(self, ctx, *, args):
         """Mass bans multiple members from the server.
@@ -472,6 +436,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(kick_members=True)
     async def softban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Soft bans a member from the server.
