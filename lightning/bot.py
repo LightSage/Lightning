@@ -1,5 +1,5 @@
 """
-Lightning.py - A multi-purpose Discord bot
+Lightning.py - A personal Discord bot
 Copyright (C) 2020 - LightSage
 
 This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ import aiohttp
 import asyncpg
 import discord
 import sentry_sdk
-from discord.ext import commands, flags, menus
+from discord.ext import commands, menus
 
 from lightning import cache, config, errors
 from lightning.context import LightningContext
@@ -38,6 +38,8 @@ from lightning.meta import __version__ as version
 from lightning.models import CommandOverrides, GuildPermissions
 
 log = logging.getLogger(__name__)
+
+
 ERROR_HANDLER_MESSAGES = {
     commands.NoPrivateMessage: "This command cannot be used in DMs!",
     commands.DisabledCommand: "Sorry, this command is currently disabled.",
@@ -68,19 +70,6 @@ async def _callable_prefix(bot, message):
         return prefixes
 
 
-LightningCogDeps = collections.namedtuple("LightningCogDeps", "required")
-
-
-class LightningCog(commands.Cog):
-    def __init_subclass__(cls, *args, **kwargs):
-        required_cogs = kwargs.get("required", [])
-        cls.__lightning_cog_deps__ = LightningCogDeps(required=required_cogs)
-
-    def __str__(self):
-        """Returns the cog’s specified name, not the class name."""
-        return self.qualified_name
-
-
 class LightningBot(commands.AutoShardedBot):
     def __init__(self):
         # Intents stuff
@@ -107,7 +96,7 @@ class LightningBot(commands.AutoShardedBot):
         self.redis_pool = cache.redis_pool
 
         path = pathlib.Path("lightning/cogs/")
-        files = path.glob('**/*.py')
+        files = path.glob("**/*.py")
         cog_list = []
         for name in files:
             name = name.with_suffix("")
@@ -118,9 +107,8 @@ class LightningBot(commands.AutoShardedBot):
                 continue
             try:
                 self.load_extension(cog)
-            except Exception:
-                log.error(f'Failed to load {cog}')
-                traceback.print_exc()
+            except Exception as e:
+                log.error(f"Failed to load {cog}", exc_info=e)
 
         self.blacklisted_users = config.Storage("config/user_blacklist.json")
 
@@ -176,7 +164,7 @@ class LightningBot(commands.AutoShardedBot):
         summary = f"{len(self.guilds)} guild(s) and {len(self.users)} user(s)"
         log.info(f'READY: {str(self.user)} ({self.user.id}) and can see {summary}.')
 
-    async def _notify_spam(self, member, channel, guild=None, blacklist=False) -> None:
+    async def _notify_of_spam(self, member, channel, guild=None, blacklist=False) -> None:
         e = discord.Embed(color=discord.Color.red(), title="Member hit ratelimit")
         webhook = discord.Webhook.from_url(self.config['logging']['auto_blacklist'],
                                            adapter=discord.AsyncWebhookAdapter(self.aiosession))
@@ -204,10 +192,10 @@ class LightningBot(commands.AutoShardedBot):
             self.command_spammers[author] += 1
             if self.command_spammers[author] >= self.config['bot']['spam_count']:
                 await self.blacklisted_users.add(author, "Automatic blacklist on command spam")
-                await self._notify_spam(message.author, message.channel, message.guild, True)
+                await self._notify_of_spam(message.author, message.channel, message.guild, True)
             # Notify ourselves that user is spamming
             else:
-                await self._notify_spam(message.author, message.channel, message.guild)
+                await self._notify_of_spam(message.author, message.channel, message.guild)
                 log.debug(f"User {message.author} ({author}) hit the command ratelimit")
         else:
             del self.command_spammers[author]
@@ -250,7 +238,7 @@ class LightningBot(commands.AutoShardedBot):
             scope.set_tag("event", event)
             scope.set_extra("args", args)
             scope.set_extra("kwargs", kwargs)
-            log.exception(f"Error on {event}: {traceback.format_exc()}")
+            log.exception(f"Error on {event}", exc_info=traceback.format_exc())
 
         with contextlib.suppress(discord.HTTPException):
             webhook = discord.Webhook.from_url(self.config['logging']['bot_errors'],
@@ -270,8 +258,11 @@ class LightningBot(commands.AutoShardedBot):
                    VALUES ($1, $2, $3);
                 """
         await self.pool.execute(query, token, traceback_text, datetime.utcnow())
-        with contextlib.suppress(discord.HTTPException, discord.Forbidden):
-            await ctx.send(f"\N{BUG} An unexpected error occurred. `{token}`")
+
+        if send_error_message:
+            with contextlib.suppress(discord.HTTPException, discord.Forbidden):
+                await ctx.send(f"\N{BUG} An unexpected error occurred. `{token}`")
+
         return token
 
     async def on_command_error(self, ctx, error):
@@ -289,13 +280,7 @@ class LightningBot(commands.AutoShardedBot):
             await ctx.send(handled)
             return
 
-        if isinstance(error, commands.MissingPermissions):
-            p = ', '.join(error.missing_perms).replace('_', ' ').replace('guild', 'server').title()
-            await ctx.send(f"{ctx.author.mention}: You don't have the right"
-                           f" permissions to run this command. You need: {p}",
-                           allowed_mentions=discord.AllowedMentions(users=[ctx.author]))
-            return
-        elif isinstance(error, commands.BotMissingPermissions):
+        if isinstance(error, commands.BotMissingPermissions):
             p = ', '.join(error.missing_perms).replace('_', ' ').replace('guild', 'server').title()
             await ctx.send("I don't have the right permissions to run this command. "
                            f"I need: {p}")
@@ -308,17 +293,14 @@ class LightningBot(commands.AutoShardedBot):
         if isinstance(error, commands.BadArgument):
             await ctx.send(f"You gave incorrect arguments. `{str(error)}` {help_text}")
             return
-        elif isinstance(error, commands.MissingRequiredArgument):
+        elif isinstance(error, (commands.MissingRequiredArgument, errors.MissingRequiredFlagArgument)):
             codeblock = f"**{ctx.prefix}{ctx.command.qualified_name} {ctx.command.signature}**\n\n{error_text}"
             await ctx.send(codeblock)
             return
         elif isinstance(error, commands.TooManyArguments):
             await ctx.send(f"You passed too many arguments.{help_text}")
             return
-        elif isinstance(error, (errors.LightningError, flags.ArgumentParsingError)):
-            await ctx.send(error_text)
-            return
-        elif isinstance(error, menus.MenuError):
+        elif isinstance(error, (errors.LightningError, errors.FlagError, menus.MenuError)):
             await ctx.send(error_text)
             return
 
