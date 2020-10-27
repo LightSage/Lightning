@@ -83,22 +83,9 @@ class Fun(commands.Cog):
             await ctx.send(file=discord.File(img_buff, filename="kurisudraw.png"))
 
     @commands.command()
-    @commands.has_permissions(attach_files=True)
-    async def jpegify(self, ctx, url: str = None):
+    async def jpegify(self, ctx):
         """Jpegify's an image"""
-        async with ctx.typing():
-            if url is None:
-                raise NoImageProvided
-            if url:
-                image_url = await getbytes(self.bot.aiosession, url)
-                if image_url is False:
-                    raise NoImageProvided
-                image_buffer = await ctx.bot.loop.run_in_executor(None,
-                                                                  self.make_jpegify,
-                                                                  image_url)
-                await ctx.send(file=discord.File(image_buffer, filename="jpegify.jpeg"))
-            else:
-                raise NoImageProvided
+        await ctx.send("Moved to beta bot. Use `b/jpegify`")
 
     @executor_function
     def make_lakitu(self, text: str):
@@ -204,40 +191,9 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.cooldown(rate=1, per=5, type=commands.BucketType.channel)
-    async def owoify(self, ctx, *, text: commands.clean_content()):
-        """An owo-ifier.
-
-        Flag options (no arguments):
-        `--random`: Owoifies random text that was sent in the channel.
-        `--lastmessage` or `--lm`: Owoifies the last message sent in the channel."""
-        fwags = flags.boolean_flags(['--random', '--lastmessage'], text,
-                                    raise_errors=False,
-                                    flag_aliases={'--lm': '--lastmessage'})
-        if fwags['--random'] is True:
-            message = await self.get_previous_messages(ctx.channel)
-            if message.content:
-                text = message.content
-            else:
-                raise LightningError('Failed to find any message content.')
-        elif fwags['--lastmessage'] is True:
-            messages = await ctx.channel.history(limit=2).flatten()
-            message = messages[1]
-            if message.content:
-                text = message.content
-            else:
-                raise LightningError('Failed to find message content'
-                                     ' in the previous message.')
-        else:
-            text = fwags['text']
-        # if len(text) > 200:
-        #    raise LightningError("No text over 200 characters!")
-        url = f'https://nekos.life/api/v2/owoify?text={urllib.parse.quote(text[:200])}'
-        async with self.bot.aiosession.get(url) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-            else:
-                return await ctx.send(f"HTTP ERROR {resp.status}. Try again later(?)")
-        await ctx.safe_send(data['owo'])
+    async def owoify(self, ctx):
+        """An owo-ifier"""
+        await ctx.send("Moved to beta bot. Use `b/help owoify` for more information")
 
     @commands.command()
     async def lolice(self, ctx, *, user: discord.Member = None):
