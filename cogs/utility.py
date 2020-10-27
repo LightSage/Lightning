@@ -292,31 +292,7 @@ class Utility(commands.Cog):
     @commands.command(aliases=['bmptopng'])
     async def bmp(self, ctx, link=None):
         """Converts a .bmp image to .png"""
-        if link is None:
-            if ctx.message.attachments:
-                f = ctx.message.attachments[0]
-                if f.filename.lower().endswith('.bmp'):
-                    image_bmp = await utils.http.getbytes(self.bot.aiosession, f.url)
-                    img_final = await self.finalize_image(image_bmp)
-                    filex = discord.File(img_final,
-                                         filename=f"BMP conversion from {ctx.author}.png")
-                    await ctx.send(file=filex)
-                else:
-                    return await ctx.send("This is not a `.bmp` file.")
-            else:
-                return await ctx.send(":x: Either provide an attachment or a link so it can be converted")
-        else:
-            if link.lower().endswith('.bmp'):
-                try:
-                    image_bmp = await utils.http.getbytes(self.bot.aiosession, link)
-                    img_final = await self.finalize_image(image_bmp)
-                    filex = discord.File(img_final, filename=f"BMP conversion from {ctx.author}.png")
-                    await ctx.send(file=filex)
-                except Exception:
-                    return await ctx.send(":x: Provide a link to your message"
-                                          "so it can be converted.")
-            else:
-                return await ctx.send("This is not a `.bmp` file.")
+        await ctx.send("Moved to beta bot. Use `b/bmp`")
 
     @commands.guild_only()
     @commands.command()
