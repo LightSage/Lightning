@@ -56,7 +56,7 @@ class Emoji(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
-    @emoji.command()
+    @emoji.command(enabled=False)
     @commands.guild_only()
     @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
