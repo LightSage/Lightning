@@ -137,6 +137,7 @@ class PartialGuild:
         self.name = record['name']
         self.owner_id = record['owner_id']
         self.left_at = record['left_at']
+        self.premium = record['premium']
 
 
 class Timer:

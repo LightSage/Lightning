@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS guilds
     name TEXT NOT NULL,
     left_at timestamp without time zone,
     owner_id BIGINT NOT NULL,
-    whitelisted BOOLEAN DEFAULT 't'
+    whitelisted BOOLEAN DEFAULT 't',
+    premium BOOLEAN DEFAULT 'f'
 );
 
 CREATE TABLE IF NOT EXISTS guild_config
