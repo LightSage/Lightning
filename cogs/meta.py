@@ -818,20 +818,7 @@ class Meta(commands.Cog):
     @commands.group(aliases=['messageinfo', 'msgtext'], invoke_without_command=True)
     async def quote(self, ctx, message_id: int, channel: ReadableChannel = None):
         """Quotes a message"""
-        if channel is None:
-            channel = ctx.channel
-        msg = discord.utils.get(ctx.bot.cached_messages, id=message_id)
-        if msg is None:
-            try:
-                msg = await channel.fetch_message(message_id)
-            except discord.NotFound:
-                raise MessageNotFoundInChannel(message_id, channel)
-            except discord.Forbidden:
-                raise ChannelPermissionFailure(f"I don't have permission to view {channel.mention}.")
-        embed = self.message_info_embed(msg)
-        if msg.author.color.value != 0:
-            embed.color = msg.author.color
-        await ctx.send(embed=embed)
+        await ctx.send("Moved to beta bot. Use `b/quote`")
 
     @quote.command(name="raw", aliases=['json'])
     async def msg_raw(self, ctx, message_id: int, channel: ReadableChannel = None):
