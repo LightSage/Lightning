@@ -335,31 +335,7 @@ class Meta(commands.Cog):
         status_text = str(member.status)
         status_text = statuses[status_text] if status_text in statuses else status_text
         embed.add_field(name='Status', value=status_text, inline=True)
-        activity = getattr(member, 'activity', None)
-        if activity is not None:
-            if isinstance(member.activity, discord.Spotify):
-                artists = ', '.join(member.activity.artists)
-                spotifyact = f"Listening to [{member.activity.title}]"\
-                             f"(https://open.spotify.com/track/{member.activity.track_id})"\
-                             f" by {artists}"
-                embed.add_field(name="Activity", value=spotifyact, inline=False)
-            elif isinstance(member.activity, discord.Streaming):
-                embed.add_field(name="Activity", value=f"Streaming [{member.activity.name}]"
-                                                       f"({member.activity.url})", inline=False)
-            elif isinstance(member.activity, discord.CustomActivity):
-                if member.activity.emoji.animated is False:
-                    ret = ".png"
-                else:
-                    ret = ".gif"
-                cdn = f'https://cdn.discordapp.com/emojis/{member.activity.emoji.id}{ret}'
-                act_name = member.activity.name if member.activity.name is not None else ""
-                if activity.emoji.id:
-                    activity = f"[{str(member.activity.emoji)}]({cdn}) {act_name}"
-                else:
-                    activity = f"{str(member.activity.emoji)} {act_name}"
-                embed.add_field(name="Activity", value=activity, inline=False)
-            else:
-                embed.add_field(name="Activity", value=member.activity.name, inline=False)
+
         joined_at = getattr(member, 'joined_at', None)
         if joined_at is not None:
             joined = member.joined_at.strftime('%Y-%m-%d %H:%M UTC')
@@ -379,7 +355,7 @@ class Meta(commands.Cog):
                                 value=", ".join(revrole) if len(roles) < 10 else "Cannot show all roles",
                                 inline=False)
         embed.set_footer(text=f'User ID: {member.id}')
-        await ctx.send(embed=embed)
+        await ctx.send("For a better userinfo, use `b/userinfo`", embed=embed)
 
     @userinfo.error
     @avatar.error
