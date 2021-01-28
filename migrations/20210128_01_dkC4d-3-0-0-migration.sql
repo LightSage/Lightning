@@ -70,7 +70,7 @@ SELECT guild_id, user_id, mod_id, timestamp, reason FROM warns;
 
 -- Convert user_restrictions to roles
 INSERT INTO roles (guild_id, user_id, punishment_roles)
-SELECT guild_id, user_id, ARRAY_AGG(role_id) FROM user_restrictions;
+SELECT guild_id, user_id, ARRAY_AGG(role_id) FROM user_restrictions GROUP BY guild_id, user_id;
 
 alter table "public"."guild_config" add column "toggleroles" bigint[];
 
